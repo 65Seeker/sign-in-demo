@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>登录</title>
+  <title>注册</title>
   <style>
     *{margin: 0;padding: 0;}
     *{box-sizing: border-box;}
@@ -30,8 +30,8 @@
 </head>
 <body>
   <div class="form-wrapper">
-    <h1>登录</h1>
-    <form id="signInForm">
+    <h1>注册</h1>
+    <form id="signUpForm">
       <div class="row">
         <label>邮箱</label>
         <input type="text" name="email">
@@ -43,17 +43,22 @@
         <span class="error"></span>
       </div>
       <div class="row">
-        <input type="submit" value="登录">
+        <label>确认密码</label>
+        <input type="password" name="password_confirmation">
+        <span class="error"></span>
+      </div>
+      <div class="row">
+        <input type="submit" value="注册">
       </div>
     </form>
   </div>
   <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
   <script>
-    let $form = $('#signInForm')
+    let $form = $('#signUpForm')
     $form.on('submit', (e)=>{
       e.preventDefault()
       let hash = {}
-      let need = ['email', 'password']
+      let need = ['email', 'password', 'password_confirmation']
       need.forEach((name)=>{
         let value = $form.find(`[name=${name}]`).val()
         hash[name] = value
@@ -71,11 +76,25 @@
           .text('填密码呀同学')
         return
       }
-      $.post('/sign_in', hash)  
+      if(hash['password_confirmation'] === ''){
+        $form.find('[name="password_confirmation"]').siblings('.error')
+          .text('确认密码呀同学')
+        return
+      }
+      if(hash['password'] !== hash['password_confirmation']){
+        $form.find('[name="password_confirmation"]').siblings('.error')
+          .text('密码不匹配')
+        return
+      }
+      $.post('/sign_up', hash)  
         .then((response)=>{
-          window.location.href = '/'
+          console.log(response)
         }, (request)=>{
-          alert('邮箱与密码不匹配')
+          let {errors} = request.responseJSON
+          if(errors.email && errors.email === 'invalid'){
+            $form.find('[name="email"]').siblings('.error')
+              .text('邮箱格式错误')
+          }
         })
     })
   </script>
